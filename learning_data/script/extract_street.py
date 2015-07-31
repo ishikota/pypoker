@@ -1,3 +1,8 @@
+"""
+This sclipt is deprecated.
+Because extract_action.py can devide data by street.
+So use extract_action.py instead.
+"""
 # add path to the data directory to read file
 import os
 import sys
@@ -46,12 +51,19 @@ def streetToCSV(data, key):
 
 
 def main():
+  path_to_dir = path_to_data+"text/0.5/"
+  files = os.listdir(path_to_dir)
   formatter = data_processor.Formatter()
-  data = formatter.format(path_to_data+"text/in.txt")
-  streetToCSV(extractStreetData(data, 'PREFLOP'),'PREFLOP')
-  streetToCSV(extractStreetData(data, 'FLOP'),'FLOP')
-  streetToCSV(extractStreetData(data, 'TURN'),'TURN')
-  streetToCSV(extractStreetData(data, 'RIVER'),'RIVER')
+  for f_name in files:
+    data = formatter.format(path_to_dir+f_name)
+    try:
+        streetToCSV(extractStreetData(data, 'PREFLOP'),'PREFLOP')
+        streetToCSV(extractStreetData(data, 'FLOP'),'FLOP')
+        streetToCSV(extractStreetData(data, 'TURN'),'TURN')
+        streetToCSV(extractStreetData(data, 'RIVER'),'RIVER')
+    except Exception as inst:
+        print "ERROR in reading {0}".format(f_name)
+        print inst
 
 if __name__ == '__main__':
   main()

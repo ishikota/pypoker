@@ -2,4 +2,4 @@
 *.pyc
 .RData
 .Rhistory
-data/
+learning_data/data/

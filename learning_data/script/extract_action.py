@@ -40,6 +40,8 @@ def extractAction(act):
   if act[:3] == 'All':
     ob = re.search('\$([0-9.]+)', act)
     return 'All-In', float(ob.group(1))
+  # TODO cause error in case when act == 'Checks (Timeout)'
+  #pdb.set_trace()
 
 def readActions(p_dict, street_data):
   pot = p_dict['pot']
@@ -81,23 +83,25 @@ def toCSV(data, key):
     writer.writerow(['action', 'FOLD','CALL/CHECK','BETS/RAISE',\
         'pot','stack','active player'])
     writer.writerows(chunk)
-  print 'Writed to '+key+'.csv'
+  #print 'Writed to '+key+'.csv'
 
-def main():
-  formatter = data_processor.Formatter()
-  data = formatter.format(path_to_data+"text/in.txt")
-  res = {'PREFLOP':[],'FLOP':[],'TURN':[],'RIVER':[]}
-  for game_data in data:
-    # read preflopp actions
-    pdb.set_trace()
+def extract_action_in_game(N, res, game_data):
+    """
+      extract player's action from game data
+      and push it to res.
+    """
+    # read game information
     p_dict = readPlayersInfo(game_data['Stage'])
+    if N!=-1 and N!=p_dict['active']: return
+
+    # read PREFLOP action
     readActions(p_dict, game_data['PREFLOP'])
     for key in p_dict:
       if key in ['pot','actions','active']: continue
       for act in p_dict[key]['act']:
         res['PREFLOP'].append(act)
 
-    if 'FLOP' not in game_data: continue
+    if 'FLOP' not in game_data: return
     # reset player action history in p_dict
     p_dict2 = copy.deepcopy(p_dict)
     p_dict2['actions'] = [0,0,0]
@@ -112,7 +116,7 @@ def main():
         res['FLOP'].append(act)
 
 
-    if 'TURN' not in game_data:continue
+    if 'TURN' not in game_data: return
     # reset player action history in p_dict
     p_dict3 = copy.deepcopy(p_dict2)
     p_dict3['actions'] = [0,0,0]
@@ -127,7 +131,7 @@ def main():
           res['TURN'].append(act)
 
     
-    if 'RIVER' not in game_data:continue
+    if 'RIVER' not in game_data: return
     # reset player action history in p_dict
     p_dict4 = copy.deepcopy(p_dict3)
     p_dict4['actions'] = [0,0,0]
@@ -141,12 +145,30 @@ def main():
       for act in p_dict4[key]['act']:
           res['RIVER'].append(act)
 
+def main():
+  path_to_dir = path_to_data+"text/0.5/"
+  files = os.listdir(path_to_dir)
+  formatter = data_processor.Formatter()
+  N = 3 # extract only N player game if N==-1 then extract all game
+  res = {'PREFLOP':[],'FLOP':[],'TURN':[],'RIVER':[]}
+  
+  for f_name in files:
+    data = formatter.format(path_to_dir+f_name)
+    for game_data in data:
+      try:
+        extract_action_in_game(N, res, game_data)
+      except Exception as inst:
+        print 'ERROR in reading {0}'.format(f_name)
+        print inst
 
-  toCSV(res['PREFLOP'], 'action_preflop')
-  toCSV(res['FLOP'], 'action_flop')
-  toCSV(res['TURN'], 'action_turn')
-  toCSV(res['RIVER'], 'action_river')
-
+  return
+  # write out data to csv file
+  PREFIX = "all" if N==-1 else str(N)
+  PREFIX += '_player_'
+  toCSV(res['PREFLOP'], PREFIX+'action_preflop')
+  toCSV(res['FLOP'], PREFIX+'action_flop')
+  toCSV(res['TURN'], PREFIX+'action_turn')
+  toCSV(res['RIVER'], PREFIX+'action_river')
 
 if __name__=='__main__':
   main()

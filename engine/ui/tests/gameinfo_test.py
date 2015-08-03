@@ -13,11 +13,11 @@ class GameInfoTest(unittest.TestCase):
         players = []
         players.append(BasePlayer(1,"a",1000))
         players.append(BasePlayer(2,"b",1000))
-        street = GameInfo.PREFLOP
+        street = GameInfo.NEWGAME
         pot = Pot()
         board = Board()
         histry = []
-        return GameInfo(street,players,pot,board,[],histry)
+        return GameInfo(street,0,players,pot,board,[],histry)
 
     def test_stack_info(self):
         G = self.get_info()

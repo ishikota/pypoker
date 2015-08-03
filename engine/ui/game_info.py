@@ -3,6 +3,7 @@ class GameInfo:
     
     Attributes:
         street: current game street flg (PREFLOP=2, FLOP=4, TURN=8, RIVER=16)
+        sb_pos: index of small blind player in players array
         players: array of player
         pot: current pot size
         board: current board instance which holds community card array
@@ -15,9 +16,9 @@ class GameInfo:
     TURN = 8
     RIVER = 16
     STREET_MAP = {NEWGAME:'NEW-GAME',PREFLOP:"PRE-FLOP", FLOP:"FLOP", TURN:"TURN", RIVER:"RIVER"}
+    
 
-
-    def __init__(self, street, players, pot, board, deactive, last_actions):
+    def __init__(self, street, sb_pos, players, pot, board, deactive, last_actions):
         self.street = street
         self.players = players
         self.pot = pot
@@ -25,7 +26,7 @@ class GameInfo:
         self.player_stacks = self.fetch_stacks(players)
         self.active_players = self.fetch_active(players, deactive)
         self.last_actions = last_actions
-        self.sb = -1
+        self.sb_pos = sb_pos
 
     def fetch_stacks(self, players):
         """

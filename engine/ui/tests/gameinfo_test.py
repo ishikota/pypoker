@@ -13,13 +13,11 @@ class GameInfoTest(unittest.TestCase):
         players = []
         players.append(BasePlayer(1,"a",1000))
         players.append(BasePlayer(2,"b",1000))
-        stage = GameInfo.PREFLOP
+        street = GameInfo.PREFLOP
         pot = Pot()
         board = Board()
-        stacks = [p.stack for p in players]
-        active = [p.pid for p in players]
         histry = []
-        return GameInfo(players,stage,pot,board,stacks,active,histry)
+        return GameInfo(street,players,pot,board,[],histry)
 
     def test_stack_info(self):
         G = self.get_info()

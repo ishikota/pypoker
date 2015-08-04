@@ -8,6 +8,14 @@ class HnadEvalTest(unittest.TestCase):
     self.E = HandEvaluator()
 
   def testHighCard(self):
+    hole = []
+    r = self.E.checkHighCard(hole)
+    r1 = (r & (15<<4))>>4
+    r2 = r & 15
+    self.assertEqual(0, r1)
+    self.assertEqual(0, r2)
+
+
     hole = [Card(3,4),Card(9,2)]
     r = self.E.checkHighCard(hole)
     r1 = (r & (15<<4))>>4

@@ -73,6 +73,7 @@ class HandEvaluator:
   lower one is lower 4bit
   """
   def checkHighCard(self, hole):
+    if len(hole) == 0: return 0
     r1 = hole[0].getRank()
     r2 = hole[1].getRank()
     return max(r1,r2)<<4|min(r1,r2)

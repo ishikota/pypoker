@@ -92,6 +92,33 @@ class Dealer(object):
             i=(i+1)%n
             agree_num += 1
 
+    def check_action(self, player, action, info):
+        """ check if player's action is legal and fix it if needed.
+
+            Returns:
+                action: checked action. if passed action is illegal
+                    then it is changed into FOLD:0
+        """
+        pass
+
+    def get_legal_action(self, player, pot, bet_agree, pay):
+        """ provides legal action for player
+
+            Args:
+                player: to get legal action
+                info: the situation data
+                bet_agree: minimum chip to participate in
+                pay: the number of chip player have payed in this street
+            Returns:
+                acts: array of legal action (often 3 action)
+        """
+        acts = ['FOLD:0']   # FOLD is always legal
+        call = '{0}:{1}'.format('CALL' if bet_agree else 'CHECK',bet_agree)
+        acts.append(call)
+        min_raise = max_raise = pot.get_min_raise()
+        _raise = '{0}:{1}:{2}'.format('RAISE',min_raise, max_raise)
+        acts.append(_raise)
+        return acts
 
 
     def check_winner(self, players, deactive, board):

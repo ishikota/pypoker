@@ -116,6 +116,28 @@ class DealerTest(unittest.TestCase):
         ok_(len(winner)==1 and winner[0]==players[1])
         print result
 
+    def test_legal_action(self):
+        d = Dealer()
+        player = BasePlayer(1,'a',100)
+        pot = Pot()
+        pot.add(5)
+        pot.add(10)
+        acts = d.get_legal_action(player, pot, 10, 0)
+        ok_("FOLD:0" in acts)
+        ok_("CALL:10" in acts)
+        ok_("RAISE:15:15" in acts)
+        pot.add(15)
+        acts = d.get_legal_action(player, pot, 15, 0)
+        ok_("FOLD:0" in acts)
+        ok_("CALL:15" in acts)
+        ok_("RAISE:20:20" in acts)
+        acts = d.get_legal_action(player, pot, 0, 0)
+        ok_("FOLD:0" in acts)
+        ok_("CHECK:0" in acts)
+        ok_("RAISE:20:20" in acts)
+
+
+
 
 if __name__ == '__main__':
     unittest.main()

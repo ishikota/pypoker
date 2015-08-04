@@ -68,13 +68,13 @@ class Dealer(object):
                 continue
 
             action = p.action(info)
-            #action = check_action(p, act, info)
+            action = self.correct_action(p, action, pot, bet_agree, pay[pos])
             act, chip = action.split(':')
             chip = int(chip)
             # check if action is raise (raise or raise-allin)
             if bet_agree < chip:
                 agree_num = 0
-                bet_agree = chip
+                bet_agree = chip + pay[pos]
 
             # remove dropped player
             if act == 'FOLD':
@@ -84,10 +84,9 @@ class Dealer(object):
 
             # pay phase
             if act != 'FOLD':
-                shortage = chip - pay[pos]
-                p.stack -= shortage
-                pot.chip += shortage
-                pay[pos] = chip
+                p.stack -= chip
+                pot.add(chip)
+                pay[pos] += chip
 
             i=(i+1)%n
             agree_num += 1
@@ -115,6 +114,9 @@ class Dealer(object):
                     raise ValueError, "> ILLEGAL CALL => {0}".format(action)
                 if chip == 0:
                     action = 'CHECK:0'
+            elif act == 'CHECK':
+                if bet_agree-pay != 0 or chip != 0:
+                    raise ValueError, "> ILLEGAL CHECK => {0}".format(action)
             elif act == 'ALLIN':
                 if player.getStack() != chip:
                     raise ValueError, "> ALLIN AMOUNT IS INVALID => {0}".format(action)

@@ -35,37 +35,39 @@ class DealerTest(unittest.TestCase):
     def test_ask_action(self):
         d = Dealer()
         pot = Pot()
-        players = [MockPlayer(1,"a",100),MockPlayer(2,"b",200), MockPlayer(3,"c",15)]
-        players[0].set_action(["CALL:10","CALL:20"])
+        players = [MockPlayer(1,"a",100),MockPlayer(2,"b",200), MockPlayer(3,"c",10)]
+        players[0].set_action(["RAISE:10","CALL:10"])
         players[1].set_action(["RAISE:20"])
-        players[2].set_action(["ALLIN:15"])
+        players[2].set_action(["ALLIN:10"])
         d.ask_action(players, pot, [], [], range(3),self.INFO)
         eq_(80,  players[0].stack)
         eq_(180,  players[1].stack)
         eq_(0,  players[2].stack)
-        eq_(55, pot.chip)
-        
+        eq_(50, pot.chip)
+
         pot = Pot()
         players = [MockPlayer(1,"a",100),MockPlayer(2,"b",200), MockPlayer(3,"c",50)]
-        players[0].set_action(["CALL:10","FOLD:0"])
+        players[0].set_action(["RAISE:10","FOLD:0"])
         players[1].set_action(["RAISE:20","RAISE:40"])
         players[2].set_action(["RAISE:30","CALL:40"])
-        d.ask_action(players, pot, [], [], range(3),self.INFO)
+        allin = []
+        d.ask_action(players, pot, [], allin, range(3),self.INFO)
         eq_(90,  players[0].stack)
-        eq_(160,  players[1].stack)
-        eq_(10,  players[2].stack)
-        eq_(90, pot.chip)
+        eq_(140,  players[1].stack)
+        eq_(0,  players[2].stack)
+        eq_(120, pot.chip)
+        eq_(players[2].pid, allin[0])
 
         pot = Pot()
         players = [MockPlayer(1,"a",100),MockPlayer(2,"b",15), MockPlayer(3,"c",50)]
-        players[0].set_action(["CALL:10","CALL:30"])
+        players[0].set_action(["RAISE:10","CALL:10"])
         players[1].set_action(["ALLIN:15"])
-        players[2].set_action(["RAISE:30"])
+        players[2].set_action(["RAISE:20"])
         d.ask_action(players, pot, [], [], range(3),self.INFO)
-        eq_(70,  players[0].stack)
+        eq_(80,  players[0].stack)
         eq_(0,  players[1].stack)
-        eq_(20,  players[2].stack)
-        eq_(75, pot.chip)
+        eq_(30,  players[2].stack)
+        eq_(55, pot.chip)
 
         # preflop case => Do not need to ask BB player if SB player called
         self.INFO.street = GameInfo.PREFLOP

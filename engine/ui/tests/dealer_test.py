@@ -120,24 +120,38 @@ class DealerTest(unittest.TestCase):
         d = Dealer()
         player = BasePlayer(1,'a',100)
         pot = Pot()
-        pot.add(5)
-        pot.add(10)
-        acts = d.get_legal_action(player, pot, 10, 0)
+        pot.add(5) # sb bet
+        pot.add(10) # bb bet
+        acts = d.get_legal_action(player, pot, 10, 5)
+        ok_("FOLD:0" in acts)
+        ok_("CALL:5" in acts)
+        ok_("RAISE:15:15" in acts)
+        pot.add(15) # sb bet
+        acts = d.get_legal_action(player, pot, 20, 10)
         ok_("FOLD:0" in acts)
         ok_("CALL:10" in acts)
-        ok_("RAISE:15:15" in acts)
-        pot.add(15)
-        acts = d.get_legal_action(player, pot, 15, 0)
-        ok_("FOLD:0" in acts)
-        ok_("CALL:15" in acts)
         ok_("RAISE:20:20" in acts)
-        acts = d.get_legal_action(player, pot, 0, 0)
+        pot.add(20) # bb bet
+        acts = d.get_legal_action(player, pot, 30, 20)
         ok_("FOLD:0" in acts)
-        ok_("CHECK:0" in acts)
-        ok_("RAISE:20:20" in acts)
+        ok_("CALL:10" in acts)
+        ok_("RAISE:25:25" in acts)
 
-
-
+    def test_correct_action(self):
+        d = Dealer()
+        player = BasePlayer(1,'a',100)
+        pot = Pot()
+        pot.add(5)  # sb
+        pot.add(10)  # bb
+        eq_('FOLD:0',d.correct_action(player, 'FOLD:10', pot, 10, 5))
+        eq_('CALL:5',d.correct_action(player, 'CALL:5', pot, 10, 5))
+        eq_('RAISE:15',d.correct_action(player, 'RAISE:15', pot, 10, 5))
+        eq_('FOLD:0',d.correct_action(player, 'CALL:15', pot, 10, 5))
+        eq_('FOLD:0',d.correct_action(player, 'RAISE:120', pot, 10, 0))
+        pot.add(15)  # sb
+        eq_('RAISE:20', d.correct_action(player, 'RAISE:20', pot, 20, 10))
+        pot.add(20)  # bb
+        eq_('CALL:10', d.correct_action(player, 'CALL:10',pot, 30, 20))
 
 if __name__ == '__main__':
     unittest.main()

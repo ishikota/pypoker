@@ -92,14 +92,40 @@ class Dealer(object):
             i=(i+1)%n
             agree_num += 1
 
-    def check_action(self, player, action, info):
-        """ check if player's action is legal and fix it if needed.
+    def correct_action(self, player, action, pot, bet_agree, pay):
+        """ check if player's action is legal and correct it if needed.
 
             Returns:
                 action: checked action. if passed action is illegal
                     then it is changed into FOLD:0
         """
-        pass
+        try:
+            act, chip = action.split(':')
+            chip = int(chip)
+            if act == 'RAISE':
+                min_raise = max_raise = pot.get_min_raise()
+                if chip < min_raise or max_raise < chip:
+                    raise ValueError, "> ILLEGAL RAISE => {0}".format(action)
+                elif player.getStack() < chip:
+                    action = 'ALLIN:{0}'.format(player.getStack())
+            elif act == 'CALL':
+                if player.getStack() < chip:
+                    action = 'ALLIN:{0}'.format(player.getStack())
+                elif chip != bet_agree - pay:
+                    raise ValueError, "> ILLEGAL CALL => {0}".format(action)
+                if chip == 0:
+                    action = 'CHECK:0'
+            elif act == 'ALLIN':
+                if player.getStack() != chip:
+                    raise ValueError, "> ALLIN AMOUNT IS INVALID => {0}".format(action)
+            elif act == 'FOLD':
+                action = 'FOLD:0'   # convert FOLD:10 into FOLD:0
+            else:
+                raise ValueError, "> UNKNOWN ACTION => {0}".format(action)
+        except ValueError, mes:  # too many values to unpack
+            print mes
+            action = 'FOLD:0'
+        return action
 
     def get_legal_action(self, player, pot, bet_agree, pay):
         """ provides legal action for player
@@ -113,7 +139,7 @@ class Dealer(object):
                 acts: array of legal action (often 3 action)
         """
         acts = ['FOLD:0']   # FOLD is always legal
-        call = '{0}:{1}'.format('CALL' if bet_agree else 'CHECK',bet_agree)
+        call = '{0}:{1}'.format('CALL' if bet_agree else 'CHECK',bet_agree - pay)
         acts.append(call)
         min_raise = max_raise = pot.get_min_raise()
         _raise = '{0}:{1}:{2}'.format('RAISE',min_raise, max_raise)

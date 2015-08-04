@@ -4,6 +4,7 @@ import pdb
 from engine.ui.game_info import GameInfo
 from engine.players.base_player import BasePlayer
 from engine.players.mock_player import MockPlayer
+from engine.ui.card import Card
 from engine.ui.pot import Pot
 from engine.ui.board import Board
 from engine.ui.dealer import Dealer
@@ -77,6 +78,43 @@ class DealerTest(unittest.TestCase):
         d.ask_action(players, pot, [], [], [2,0,1],self.INFO)
         eq_(100-5,  players[0].stack)
         eq_(15,  players[1].stack)
+
+    def test_check_winner(self):
+        d = Dealer()
+        board = Board()
+        players = [MockPlayer(1,"a",100),MockPlayer(2,"b",15)]
+
+        # Case1
+        community = [Card(3,4),Card(5,4),Card(7,2),Card(6,4),Card(10,2)]
+        hole1 = [Card(2,4),Card(9,2)] # no pair
+        hole2 = [Card(3,4),Card(8,2)] # one pair
+        board.addCards(community)
+        players[0].setHoleCards(hole1)
+        players[1].setHoleCards(hole2)
+        deactive = []
+        winner, result = d.check_winner(players, deactive, board)
+        ok_(len(winner)==1 and winner[0]==players[1])
+        print result
+        # Case2
+        board.reset()
+        community = [Card(3,4),Card(3,4),Card(3,2),Card(6,4),Card(10,2)]
+        hole1 = [Card(3,4),Card(9,2)] # four card
+        hole2 = [Card(4,4),Card(6,2)] # full house
+        hole3 = [Card(2,4),Card(8,2)] # three card
+        board.addCards(community)
+        players.append(MockPlayer(3,"c",200))
+        players[0].setHoleCards(hole1)
+        players[1].setHoleCards(hole2)
+        players[2].setHoleCards(hole3)
+        deactive = []
+        winner, result = d.check_winner(players, deactive, board)
+        ok_(len(winner)==1 and winner[0]==players[0])
+        print result
+
+        deactive = [players[0].pid]
+        winner, result = d.check_winner(players, deactive, board)
+        ok_(len(winner)==1 and winner[0]==players[1])
+        print result
 
 
 if __name__ == '__main__':

@@ -1,8 +1,12 @@
-import pdb
+from engine.ui.hand_evaluator import HandEvaluator
+
 class Dealer(object):
     
     # CONSTANTS
     SMALL_BLIND = 5
+
+    def __init__(self):
+        self.E = HandEvaluator()
 
     def collect_blind(self, pot, players, sb_pos, sb_chip):
         """
@@ -90,8 +94,27 @@ class Dealer(object):
 
 
 
-    def calc_round_result(self):
-        pass
+    def check_winner(self, players, deactive, board):
+        """ evaluates player's hands and return winner
+            
+            Returns:
+                winner: the array of player who wins the game (multiple player may win)
+                result : the array of tuple of hands information (hand(bit flg), hand(str), player)
+        """
+        winner, result = [], []
+        best = -100
+        for player in players:
+            bit, s = None, None
+            if player.pid in deactive:
+                bit = -1
+                s = player.getName()+" : FOLD"
+            else:
+                bit = self.E.evalHand(player.getCards(), board.getCards())
+                if bit > best: winner = [player]; best = bit
+                elif bit == best: winner.append(player)
+                s = player.getName()+' : '+self.E.HANDRANK_MAP[self.E.maskHand(bit)]
+            result.append((bit,s,player))
+        return winner, result
 
     def money_to_winner(self):
         pass

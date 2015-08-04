@@ -30,8 +30,9 @@ class Pot:
             append chip to pot and update last bet info
         """
         self.chip += num
-        self.last2_bet = self.last_bet
-        self.last_bet = num
+        if num > self.last_bet:  # if this pay is raise
+            self.last2_bet = self.last_bet
+            self.last_bet = num
 
     def get_chip(self):
         return self.chip
@@ -42,5 +43,8 @@ class Pot:
 
     # chip amout to raise
     def get_min_raise(self):
-        return self.last_bet + (self.last_bet - self.last2_bet)
+        if self.last_bet == 0: 
+            return 10   # TODO fix this value
+        else:
+            return self.last_bet + (self.last_bet - self.last2_bet)
 

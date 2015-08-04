@@ -16,6 +16,10 @@ class PotTest(unittest.TestCase):
         eq_(15, p.get_min_raise())
         p.add(15) # raise 15
         eq_(20 ,p.get_min_raise())
+        p.add(15) # call 15
+        eq_(20,p.get_min_raise())
+        p.reset_bet()
+        eq_(10, p.get_min_raise())
 
 
 if __name__ == '__main__':

@@ -116,6 +116,41 @@ class TableTest(unittest.TestCase):
         eq_(1,len(tb.deactive))
         eq_(0,len(tb.allin))
 
+    def test_round(self):
+        tb = Table()
+        p = [MockPlayer(1,"sb",100),MockPlayer(2,"bb",200),MockPlayer(3,"n",300)]
+        tb.setup(p, 5)
+        p = [MockPlayer(1,"sb",100),MockPlayer(2,"bb",200),MockPlayer(3,"n",300)]
+        p[0].set_action(["CALL:10","CHECK:0","RAISE:20","CALL:30","RAISE:20"])
+        p[1].set_action(["CALL:10","CHECK:0","CALL:20","FOLD:0"])
+        p[2].set_action(["RAISE:10","CHECK:0","RAISE:30","FOLD:0"])
+        tb.players = p
+        tb.init_round()
+        tb.preflop()
+        tb.street(GameInfo.FLOP)
+        tb.street(GameInfo.TURN)
+        tb.street(GameInfo.RIVER)
+        eq_(130, tb.pot.get_chip())
+        tb.showoff()
+        eq_(100-60+130, p[0].getStack())
+        eq_(200-30, p[1].getStack())
+        eq_(300-40,p[2].getStack())
+
+    def test_blind(self):
+        tb = Table()
+        p = [MockPlayer(1,"sb",100),MockPlayer(2,"bb",200),MockPlayer(3,"n",300)]
+        tb.setup(p, 5)
+        p = [MockPlayer(1,"sb",100),MockPlayer(2,"bb",200),MockPlayer(3,"n",300)]
+        p[0].set_action(["FOLD:0"])
+        p[1].set_action(["FOLD:0"])
+        p[2].set_action(["FOLD:0"])
+        tb.players = p
+        tb.play_round()
+        eq_(100-5, p[0].getStack())
+        eq_(200-10+15, p[1].getStack())
+        eq_(300, p[2].getStack())
+
+
 if __name__ == '__main__':
     unittest.main()
 

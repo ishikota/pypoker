@@ -55,12 +55,17 @@ class Table(object):
     # play one round
     def play_round(self):
         if not self.AUTO: subprocess.call('clear')
-        self.roundset()
+
+        self.init_round()
         self.preflop()
         if len(self.deactive)+len(self.allin)+1 != len(self.players):self.street(GameInfo.FLOP)
         if len(self.deactive)+len(self.allin)+1 != len(self.players):self.street(GameInfo.TURN)
         if len(self.deactive)+len(self.allin)+1 != len(self.players):self.street(GameInfo.RIVER)
-        self.showOff()
+        self.showoff()
+
+        if not self.AUTO:
+            print '\n> Enter any input to start next round ...\n'
+            raw_input()
 
     def preflop(self):
         """ Preflop task
@@ -92,3 +97,7 @@ class Table(object):
         info = GameInfo(street, self.sb_pos, self.players, self.pot, self.board, self.deactive, [])
         self.D.ask_action(self.players, self.pot, self.deactive, self.allin, order, info)
 
+    def showoff(self):
+        winner, result = self.D.check_winner(self.players, self.deactive, self.board)
+        self.D.money_to_winner(self.pot, self.players, winner, self.allin)
+        self.D.display_result(self.round_count, winner, result)

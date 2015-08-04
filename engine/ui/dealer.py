@@ -116,7 +116,21 @@ class Dealer(object):
             result.append((bit,s,player))
         return winner, result
 
-    def money_to_winner(self):
-        pass
+    def money_to_winner(self, pot, players, winner, allin):
+        """ Give pot chip to winner
+
+            TODO: Not dealing with the case when allin player wins
+
+        """
+        n = len(winner)
+        win_chip = 1.0*pot.get_chip()/n
+        for player in winner:
+            player.addStack(win_chip)
 
 
+    def display_result(self, count, winner, result):
+        print '\n*** ROUND '+str(count)+' RESULT ***\n'
+        for res in result:
+            win = ' ** WINNER **' if res[2] in winner else ''
+            print res[1] + '  ('+str(res[2].getStack())+')'+win
+        print '\n***********************\n'

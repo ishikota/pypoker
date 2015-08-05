@@ -147,6 +147,34 @@ class TableTest(unittest.TestCase):
         eq_(200-10+15, p[1].getStack())
         eq_(300, p[2].getStack())
 
+    def test_skip_asking(self):
+        """
+            test 3 player game if last player is one player then jump to showoff
+            Case1: ALLIN, FOLD, CALL -> do not ask action to left player
+            Case2: FOLD, FOLD -> do not ask action to left player
+        """
+        tb = Table()
+        p = [MockPlayer(1,"sb",100),MockPlayer(2,"bb",200),MockPlayer(3,"n",300)]
+        tb.setup(p, 5)
+        p = [MockPlayer(1,"sb",100),MockPlayer(2,"bb",200),MockPlayer(3,"n",5)]
+        p[0].set_action(["FOLD:0"])
+        p[1].set_action(["CHECK:0","FOLD:0"])   # this player is left player
+        p[2].set_action(["CALL:10", "FOLD:0"])    # ALLIN:5, FOLD should not be called
+        tb.players = p
+        tb.play_round()
+        eq_(5,len(tb.board.cards))
+
+        tb = Table()
+        p = [MockPlayer(1,"sb",100),MockPlayer(2,"bb",200),MockPlayer(3,"n",300)]
+        tb.setup(p, 5)
+        p = [MockPlayer(1,"sb",100),MockPlayer(2,"bb",200),MockPlayer(3,"n",5)]
+        p[0].set_action(["FOLD:0"])
+        p[1].set_action(["FOLD:0"])   # this player is left player
+        p[2].set_action(["FOLD:0"])
+        tb.players = p
+        tb.play_round()
+        eq_(0,len(tb.board.cards))
+        eq_(205, p[1].stack)
 
 if __name__ == '__main__':
     unittest.main()

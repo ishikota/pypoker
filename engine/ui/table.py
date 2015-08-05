@@ -58,9 +58,9 @@ class Table(object):
 
         self.init_round()
         self.preflop()
-        if len(self.deactive)+len(self.allin)+1 != len(self.players):self.street(GameInfo.FLOP)
-        if len(self.deactive)+len(self.allin)+1 != len(self.players):self.street(GameInfo.TURN)
-        if len(self.deactive)+len(self.allin)+1 != len(self.players):self.street(GameInfo.RIVER)
+        if len(self.deactive)+1 != len(self.players): self.street(GameInfo.FLOP)
+        if len(self.deactive)+1 != len(self.players): self.street(GameInfo.TURN)
+        if len(self.deactive)+1 != len(self.players): self.street(GameInfo.RIVER)
         self.showoff()
 
         if not self.AUTO:
@@ -92,6 +92,14 @@ class Table(object):
         else:
             self.board.addCard(self.deck.drawCard())
         if not self.AUTO: self.board.display()
+
+        # the case when left player is allin and call or
+        #   the case when all player allin
+        if len(self.deactive)+len(self.allin)+1 == len(self.players) or \
+                len(self.deactive)+len(self.allin) == len(self.players):
+            return
+
+        # ask action to player
         n = len(self.players)
         order = [(self.sb_pos+i)%n for i in range(n)]
         info = GameInfo(street, self.sb_pos, self.players, self.pot, self.board, self.deactive, [])

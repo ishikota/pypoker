@@ -8,6 +8,8 @@ from engine.ui.board import Board
 from nose.tools import *
 from engine.ui.table import Table
 from engine.ui.card import Card
+from engine.ui.debug_table import DebugTable
+
 class TableTest(unittest.TestCase):
 
 
@@ -178,19 +180,35 @@ class TableTest(unittest.TestCase):
         eq_(205, p[1].stack)
 
     def test_retire(self):
-        tb = Table()
+        tb = DebugTable()
         p = [MockPlayer(1,"sb",100),MockPlayer(2,"bb",200),MockPlayer(3,"n",5)]
         tb.setup(p, 5)
         p = [MockPlayer(1,"sb",100),MockPlayer(2,"bb",200),MockPlayer(3,"n",5)]
         p[0].set_action(["CALL:5"])
         p[1].set_action(["FOLD:0"])
         p[2].set_action(["CALL:10"])  # ALLIN:5
-        p[0].setHoleCards([Card(14,2),Card(14,4)])
-        p[2].setHoleCards([Card(4,2),Card(4,4)])
+        player_cards = [Card(14,2),Card(14,4),Card(8,2),Card(8,4),Card(4,2),Card(4,4)]
+        board_cards = [Card(2,2),Card(2,4),Card(2,8),Card(2,16),Card(3,2)]
+        tb.set_cheat_cards(player_cards, board_cards)
         tb.players = p
         tb.play_round()
         eq_(115, p[0].stack)
         eq_(p[2].pid,tb.retire[0])
+
+    def test_cheat_table(self):
+        tb = DebugTable()
+        p = [MockPlayer(1,"sb",100),MockPlayer(2,"bb",200),MockPlayer(3,"n",300)]
+        tb.setup(p, 5)
+        p = [MockPlayer(1,"sb",100),MockPlayer(2,"bb",200),MockPlayer(3,"n",300)]
+        p[0].set_action(["CALL:5", "CHECK:0", "CHECK:0", "CHECK:0"])
+        p[1].set_action(["CHECK:0", "CHECK:0", "CHECK:0", "CHECK:0"])
+        p[2].set_action(["CALL:10", "CHECK:0", "CHECK:0", "CHECK:0"])
+        player_cards = [Card(6,2),Card(6,4),Card(10,2),Card(8,4),Card(14,2),Card(11,4)]
+        board_cards = [Card(2,2),Card(6,2),Card(8,8),Card(8,16),Card(12,2)]
+        tb.set_cheat_cards(player_cards, board_cards)
+        tb.players = p
+        tb.play_round()
+        eq_(120,p[0].stack)
 
 if __name__ == '__main__':
     unittest.main()

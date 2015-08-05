@@ -1,4 +1,5 @@
 from base_player import BasePlayer
+from engine.ui.game_info import GameInfo
 
 class MockPlayer(BasePlayer):
     '''
@@ -17,6 +18,8 @@ class MockPlayer(BasePlayer):
         self.actions = actions
 
     def action(self, info):
+        if info and info.street == GameInfo.NEWGAME:
+            return
         action = self.actions[self.act_index%len(self.actions)]
         self.act_index += 1
         if self.D: print "{0}:{1}".format(self.NAME, action)

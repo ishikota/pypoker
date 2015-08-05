@@ -38,11 +38,19 @@ class Table(object):
         self.round_count += 1
         self.board.reset()
         self.pot.reset()
-        self.deck.recombine()
+        self.deck.shuffle(True)
+        self.D.deal_card(self.deck, self.players, self.retire)
         self.sb_pos = (self.sb_pos+1)%len(self.players)
         self.allin = []
         self.deactive = []
         self.deactive += self.retire
+        info = GameInfo(GameInfo.NEWGAME, self.sb_pos, self.players,\
+                self.pot, self.board, self.deactive, [])
+        if not self.AUTO: info.display
+
+        # send new game information to all players
+        for player in self.players:
+            player.action(info)
 
     # public method to start the poker game
     def start_game(self, n):

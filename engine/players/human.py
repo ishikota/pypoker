@@ -9,7 +9,7 @@ class Human(BasePlayer):
         super(Human, self).__init__(pid, player_name, start_stack)
 
     def action(self, info):
-        if info.stage == 0:
+        if info.street == 0:
             return  # human player do nothing when NEW GAME begins
         info.display()
         print self.getName()+' > input your action,'

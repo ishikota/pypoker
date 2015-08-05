@@ -18,7 +18,7 @@ class DealerTest(unittest.TestCase):
         players = [BasePlayer(1,"a",100),BasePlayer(2,"b",200)]
         pot = Pot()
         board = Board()
-        self.INFO = GameInfo(0, 0, players, pot, board, [], [])
+        self.INFO = GameInfo(-1, 0, players, pot, board, [], [])
 
 
     def test_collect_blind(self):

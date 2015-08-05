@@ -3,4 +3,4 @@
 *.pyc
 .RData
 .Rhistory
-learning_data/data/
+pypoker/learning_data/data/

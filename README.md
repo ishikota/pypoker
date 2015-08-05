@@ -1,0 +1,2 @@
+# pypoker
+Python Poker Engine

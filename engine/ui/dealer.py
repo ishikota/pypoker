@@ -8,6 +8,11 @@ class Dealer(object):
     def __init__(self):
         self.E = HandEvaluator()
 
+    def deal_card(self, deck, players, retire):
+        for i in range(len(players)):
+            if i not in retire:
+                players[i].setHoleCards(deck.drawCards(2))
+
     def collect_blind(self, pot, players, sb_pos, sb_chip):
         """
 

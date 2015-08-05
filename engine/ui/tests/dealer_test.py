@@ -8,6 +8,7 @@ from engine.ui.card import Card
 from engine.ui.pot import Pot
 from engine.ui.board import Board
 from engine.ui.dealer import Dealer
+from engine.ui.deck import Deck
 
 from nose.tools import *
 
@@ -154,6 +155,18 @@ class DealerTest(unittest.TestCase):
         eq_('RAISE:20', d.correct_action(player, 'RAISE:20', pot, 20, 10))
         pot.add(20)  # bb
         eq_('CALL:10', d.correct_action(player, 'CALL:10',pot, 30, 20))
+
+    def test_deal_card(self):
+        d = Dealer()
+        deck = Deck()
+        players = [MockPlayer(1,"a",100-5),MockPlayer(2,"b",15), MockPlayer(3,"c",50)]
+        d.deal_card(deck, players, [])
+        eq_(2, players[0].getCards()[0].toID())
+        eq_(15, players[0].getCards()[1].toID())
+        eq_(28, players[1].getCards()[0].toID())
+        eq_(41, players[1].getCards()[1].toID())
+        eq_(3, players[2].getCards()[0].toID())
+        eq_(16, players[2].getCards()[1].toID())
 
 if __name__ == '__main__':
     unittest.main()

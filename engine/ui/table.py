@@ -107,5 +107,5 @@ class Table(object):
 
     def showoff(self):
         winner, result = self.D.check_winner(self.players, self.deactive, self.board)
-        self.D.money_to_winner(self.pot, self.players, winner, self.allin)
+        self.D.money_to_winner(self.pot, self.players, winner, self.allin, self.retire)
         self.D.display_result(self.round_count, winner, result)

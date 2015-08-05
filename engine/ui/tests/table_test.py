@@ -7,6 +7,7 @@ from engine.ui.pot import Pot
 from engine.ui.board import Board
 from nose.tools import *
 from engine.ui.table import Table
+from engine.ui.card import Card
 class TableTest(unittest.TestCase):
 
 
@@ -175,6 +176,21 @@ class TableTest(unittest.TestCase):
         tb.play_round()
         eq_(0,len(tb.board.cards))
         eq_(205, p[1].stack)
+
+    def test_retire(self):
+        tb = Table()
+        p = [MockPlayer(1,"sb",100),MockPlayer(2,"bb",200),MockPlayer(3,"n",5)]
+        tb.setup(p, 5)
+        p = [MockPlayer(1,"sb",100),MockPlayer(2,"bb",200),MockPlayer(3,"n",5)]
+        p[0].set_action(["CALL:5"])
+        p[1].set_action(["FOLD:0"])
+        p[2].set_action(["CALL:10"])  # ALLIN:5
+        p[0].setHoleCards([Card(14,2),Card(14,4)])
+        p[2].setHoleCards([Card(4,2),Card(4,4)])
+        tb.players = p
+        tb.play_round()
+        eq_(115, p[0].stack)
+        eq_(p[2].pid,tb.retire[0])
 
 if __name__ == '__main__':
     unittest.main()

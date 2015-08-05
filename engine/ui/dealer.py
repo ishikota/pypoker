@@ -10,7 +10,7 @@ class Dealer(object):
 
     def collect_blind(self, pot, players, sb_pos, sb_chip):
         """
-        
+
         Collect the blind from players
         If blind player doesn't have enough money the all-in.
 
@@ -35,7 +35,7 @@ class Dealer(object):
 
     def ask_action(self, players, pot, deactive, allin, order, info):
         """
-        
+
         Ask action to passed players until all players action is fixed.
 
         Args:
@@ -171,17 +171,21 @@ class Dealer(object):
             result.append((bit,s,player))
         return winner, result
 
-    def money_to_winner(self, pot, players, winner, allin):
-        """ Give pot chip to winner
+    def money_to_winner(self, pot, players, winner, allin, retire):
+        """
+        Give pot chip to winner and check if dropped player exists.
+        If player's stack is 0, after stack update, then append
+        his player id to passed retire array.
 
-            TODO: Not dealing with the case when allin player wins
-
+        TODO: Not dealing with the case when allin player wins
         """
         n = len(winner)
         win_chip = 1.0*pot.get_chip()/n
         for player in winner:
             player.addStack(win_chip)
-
+        for player in players:
+            if player.stack == 0:
+                retire.append(player.pid)
 
     def display_result(self, count, winner, result):
         print '\n*** ROUND '+str(count)+' RESULT ***\n'

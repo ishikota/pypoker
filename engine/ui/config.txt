@@ -1,0 +1,13 @@
+# game settings
+round_num:10
+sb_num:5
+start_stack:200
+player_num:3
+
+#player settings
+p1_name:human1 san
+p1_strategy:human
+p2_name:human2 san
+p2_strategy:human
+p3_name:human3 san
+p3_strategy:human

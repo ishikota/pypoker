@@ -4,3 +4,5 @@
 .RData
 .Rhistory
 pypoker/learning_data/data/
+.coverage
+cover/

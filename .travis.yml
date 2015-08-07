@@ -2,4 +2,8 @@
 language: python
 python:
     - 2.7
-script: nosetests pypoker/
+install:
+    - pip install coverage
+script: nosetests --with-coverage pypoker/
+after_success:
+    - coveralls

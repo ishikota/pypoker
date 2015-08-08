@@ -29,6 +29,6 @@ class ConfigTest(unittest.TestCase):
             eq_(name_ans[i], player.getName())
             eq_(200, player.getStack())
             ok_(isinstance(player, class_ans[i]))
-
+            ok_(not C.getIfAuto())
 if __name__ == '__main__':
     unittest.main()

@@ -3,6 +3,7 @@ round_num:10
 sb_num:5
 start_stack:200
 player_num:2
+auto:0
 
 #player settings
 p1_name:base1 san

@@ -9,6 +9,7 @@ class GameInfo:
         board: current board instance which holds community card array
         deactive: players who dropped this game
         last_action: array of action of other player in this street.(the action before you)
+
     """
     NEWGAME = 0
     PREFLOP = 2
@@ -23,31 +24,11 @@ class GameInfo:
         self.players = players
         self.pot = pot
         self.board = board
-        self.player_stacks = self.fetch_stacks(players)
-        self.active_players = self.fetch_active(players, deactive)
+        self.player_stacks = self.get_player_stack(players)
+        self.active_players = self.get_active_player(players, deactive)
         self.last_actions = last_actions
         self.sb_pos = sb_pos
 
-    def fetch_stacks(self, players):
-        """
-        return format
-        [player_id:stack, player_id:stack, ...]
-        """
-        array = []
-        for player in players:
-            array.append(str(player.pid)+':'+str(player.getStack()))
-        return array
-
-    def fetch_active(self, players, deactive):
-        """
-        return format
-        [player_id, player_id, ...]
-        """
-        array = []
-        for player in players:
-            if player.pid not in deactive:
-                array.append(player.pid)
-        return array
 
     def display(self):
         """
@@ -57,34 +38,67 @@ class GameInfo:
         print ''
         print div
         print ' STREET : '+self.STREET_MAP[self.street]
-        print ' POT    : '+str(self.pot.getChipNum())
+        print ' POT    : '+str(self.pot.get_chip())
         print ' BOARD  : '+self.board.toString()
-        print ' STACK  : '+self.createStackStr(self.players)
-        print ' ACTIVE : '+self.createActiveStr(self.players, self.active_players)
-        print ' LAST ACTION: '+self.createLastActionStr(self.players, self.last_actions)
+        print ' STACK  : {0}'.format(self.get_player_stack4display())
+        print ' ACTIVE : {0}'.format(self.get_active_player4display())
+        print ' LAST ACTION: {0}'.format(self.get_last_acts4display())
         print div
         print ''
 
-    def get_stacks(self):
+
+    def get_player_stack(self, players):
+        """
+            return all player's id and their stack in array
+            format is [player_id:stack, player_id:stack, ...]
+        """
+        array = []
+        for player in players:
+            array.append(str(player.pid)+':'+str(player.getStack()))
+        return array
+
+    def get_active_player(self, players, deactive):
+        """
+        return active players in array
+        format is [player_id, player_id, ...]
+        """
+        array = []
+        for player in players:
+            if player.pid not in deactive:
+                array.append(player.pid)
+        return array
+
+    def get_last_acts(self):
+        """
+            return actions which played in this street
+            format is [player_id:action,...]
+        """
+        array = []
+        for action in self.last_actions:
+            pid, act, num = action.split(':')
+            array.append(':'.join([pid,act,num]))
+        return array
+
+    def get_player_stack4display(self):
         array = []
         for player in self.players:
             array.append("{0}:{1:d}".format(player.getName(),player.getStack()))
         return array
   
-    def get_active(self):
+    def get_active_player4display(self):
         array = []
         for player in self.players:
             if player.pid in self.active_players:
                 array.append(player.getName())
         return array
 
-    def get_last_acts(self):
+    def get_last_acts4display(self):
         name_map = {}
         for player in self.players:
             name_map[player.pid] = player.getName()
-        res = []
+        array = []
         for action in self.last_actions:
             pid, act, num = action.split(':')
             name = name_map[int(pid)]
-            res.append(':'.join([name,act,num]))
-        return res
+            array.append(':'.join([name,act,num]))
+        return array

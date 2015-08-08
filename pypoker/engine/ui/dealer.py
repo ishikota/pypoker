@@ -187,7 +187,7 @@ class Dealer(object):
         TODO: Not dealing with the case when allin player wins
         """
         n = len(winner)
-        win_chip = 1.0*pot.get_chip()/n
+        win_chip = int(1.0*pot.get_chip()/n)
         for player in winner:
             player.addStack(win_chip)
         for player in players:

@@ -12,8 +12,9 @@ class Human(BasePlayer):
         if info.street == 0:
             return  # human player do nothing when NEW GAME begins
         info.display()
+        legal_action = info.get_legal_action()
         print self.getName()+' > input your action,'
-        print '    Legal Action : '+str(self.getLegalAction(info))
+        print '    Legal Action : '+str(legal_action)
         print '    Your card : '+str(self.cardsToString())
         print '    1: fold, 2: call or check, 3: raise'
         while True:
@@ -35,4 +36,6 @@ class Human(BasePlayer):
                             print '> Error: Raise amount must be integer'
                             continue
                         return 'RAISE:'+str(pay)
-            return 'FOLD:0' if a == 1 else 'CALL:0'
+            if a == 2 and len(legal_action) >= 2:
+                return legal_action[1]  # CALL:??
+            return 'FOLD:0'

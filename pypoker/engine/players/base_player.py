@@ -38,19 +38,6 @@ class BasePlayer(object):
     def action(self, info):
         return 'FOLD'   # This base class always folds the game.
 
-    def getLegalAction(self, info):
-        """
-        Returns:
-            array of legal action for specified player.
-        """
-        acts = ['FOLD:0'] # fold is always legal
-        if info.pot.getMinBet() == 0: # CALL:0 => CHECK:0
-            acts.append('CHECK:0')
-        else:
-            acts.append('CALL:'+str(info.pot.getMinBet()))
-        acts.append('RAISE:'+str(info.pot.getMinRaise())+':'+str(info.pot.getMaxRaise()))
-        return acts
-
     def cardsToString(self):
         """
         Returns:

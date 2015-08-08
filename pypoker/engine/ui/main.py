@@ -10,10 +10,14 @@
     export PYTHONPATH
 
 """
-import sys, os
-
+import sys, os, subprocess
+import user_interface
 from engine.ui.table import Table
 from engine.ui.config import Config
+
+# Display logo
+subprocess.call('clear')
+user_interface.logo()
 
 # read game config
 C = Config()

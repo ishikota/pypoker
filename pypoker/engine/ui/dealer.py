@@ -72,6 +72,8 @@ class Dealer(object):
                 i=(i+1)%n
                 continue
 
+            info.set_legal_action(\
+                    self.get_legal_action(p, pot, bet_agree, pay[pos]))
             action = p.action(info)
             action = self.correct_action(p, action, pot, bet_agree, pay[pos])
             act, chip = action.split(':')

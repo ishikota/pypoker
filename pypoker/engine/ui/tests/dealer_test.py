@@ -12,6 +12,16 @@ from engine.ui.deck import Deck
 
 from nose.tools import *
 
+class MockLegalActPlayer(BasePlayer):
+
+    def set_ans(self, ans):
+        self.ans = ans
+
+    def action(self, info):
+        eq_(self.ans, info.get_legal_action())
+        return info.get_legal_action()[1]
+
+
 class DealerTest(unittest.TestCase):
 
     def setUp(self):
@@ -81,6 +91,17 @@ class DealerTest(unittest.TestCase):
         d.ask_action(players, pot, [], [], [2,0,1],self.INFO)
         eq_(100-5,  players[0].stack)
         eq_(15,  players[1].stack)
+
+    def test_legal_action_provide(self):
+        self.INFO.street = GameInfo.PREFLOP
+        self.INFO.sb_pos = 0
+        d = Dealer()
+        pot = Pot()
+        pot.add(5); pot.add(10)  #
+        players = [MockLegalActPlayer(1,"sb",100),MockLegalActPlayer(2,"bb",10)]
+        players[0].set_ans(["FOLD:0","CALL:5","RAISE:15:15"])   # choose call
+        players[1].set_ans(["FOLD:0","CALL:0", "RAISE:15:15"])
+        d.ask_action(players, pot, [], [], range(2),self.INFO)
 
     def test_check_winner(self):
         d = Dealer()

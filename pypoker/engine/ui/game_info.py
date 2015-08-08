@@ -21,13 +21,14 @@ class GameInfo:
 
     def __init__(self, street, sb_pos, players, pot, board, deactive, last_actions):
         self.street = street
+        self.sb_pos = sb_pos
         self.players = players
         self.pot = pot
         self.board = board
         self.player_stacks = self.get_player_stack(players)
         self.active_players = self.get_active_player(players, deactive)
         self.last_actions = last_actions
-        self.sb_pos = sb_pos
+        self.legal_actions = None   # this info is set only when dealer asks action to player
 
 
     def display(self):
@@ -102,3 +103,9 @@ class GameInfo:
             name = name_map[int(pid)]
             array.append(':'.join([name,act,num]))
         return array
+
+    def set_legal_action(self, actions):
+        self.legal_actions = actions
+
+    def get_legal_action(self):
+        return self.legal_actions

@@ -47,7 +47,6 @@ class GameInfo:
         print div
         print ''
 
-
     def get_player_stack(self, players):
         """
             return all player's id and their stack in array

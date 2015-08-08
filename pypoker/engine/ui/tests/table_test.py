@@ -145,6 +145,7 @@ class TableTest(unittest.TestCase):
         p[1].set_action(["FOLD:0"])
         p[2].set_action(["FOLD:0"])
         tb.players = p
+        tb.init_round()
         tb.play_round()
         eq_(100-5, p[0].getStack())
         eq_(200-10+15, p[1].getStack())
@@ -164,6 +165,7 @@ class TableTest(unittest.TestCase):
         p[1].set_action(["CHECK:0","FOLD:0"])   # this player is left player
         p[2].set_action(["CALL:10", "FOLD:0"])    # ALLIN:5, FOLD should not be called
         tb.players = p
+        tb.init_round()
         tb.play_round()
         eq_(5,len(tb.board.cards))
 
@@ -175,6 +177,7 @@ class TableTest(unittest.TestCase):
         p[1].set_action(["FOLD:0"])   # this player is left player
         p[2].set_action(["FOLD:0"])
         tb.players = p
+        tb.init_round()
         tb.play_round()
         eq_(0,len(tb.board.cards))
         eq_(205, p[1].stack)
@@ -191,6 +194,7 @@ class TableTest(unittest.TestCase):
         board_cards = [Card(2,2),Card(2,4),Card(2,8),Card(2,16),Card(3,2)]
         tb.set_cheat_cards(player_cards, board_cards)
         tb.players = p
+        tb.init_round()
         tb.play_round()
         eq_(115, p[0].stack)
         eq_(p[2].pid,tb.retire[0])
@@ -207,6 +211,7 @@ class TableTest(unittest.TestCase):
         board_cards = [Card(2,2),Card(6,2),Card(8,8),Card(8,16),Card(12,2)]
         tb.set_cheat_cards(player_cards, board_cards)
         tb.players = p
+        tb.init_round()
         tb.play_round()
         eq_(120,p[0].stack)
 

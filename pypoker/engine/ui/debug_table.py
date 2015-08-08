@@ -35,9 +35,6 @@ class DebugTable(Table):
 
     # play one round
     def play_round(self):
-        if not self.AUTO: subprocess.call('clear')
-
-        self.init_round()
         self.preflop()
         if len(self.deactive)+1 != len(self.players): self.street(GameInfo.FLOP)
         if len(self.deactive)+1 != len(self.players): self.street(GameInfo.TURN)

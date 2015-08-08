@@ -8,6 +8,8 @@ from engine.ui.deck import Deck
 from engine.ui.pot import Pot
 from engine.ui.hand_evaluator import HandEvaluator
 
+import engine.ui.user_interface as ui
+
 class Table(object):
 
     def __init__(self):
@@ -46,7 +48,6 @@ class Table(object):
         self.deactive += self.retire
         info = GameInfo(GameInfo.NEWGAME, self.sb_pos, self.players,\
                 self.pot, self.board, self.deactive, [])
-        if not self.AUTO: info.display
 
         # send new game information to all players
         for player in self.players:
@@ -58,13 +59,14 @@ class Table(object):
         for i in range(n):
             # if one player beats the others then finish the game.
             if len(self.retire)+1 == len(self.players): break
+            if not self.AUTO: subprocess.call('clear')
+            self.init_round()
+            ui.round_info(self.round_count, n, self.players, self.sb_pos)
             self.play_round()
     
     # play one round
     def play_round(self):
-        if not self.AUTO: subprocess.call('clear')
-
-        self.init_round()
+        # start street
         self.preflop()
         if len(self.deactive)+1 != len(self.players): self.street(GameInfo.FLOP)
         if len(self.deactive)+1 != len(self.players): self.street(GameInfo.TURN)

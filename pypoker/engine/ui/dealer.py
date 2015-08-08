@@ -76,6 +76,7 @@ class Dealer(object):
                     self.get_legal_action(p, pot, bet_agree, pay[pos]))
             action = p.action(info)
             action = self.correct_action(p, action, pot, bet_agree, pay[pos])
+            info.last_actions.append("{0}:{1}".format(p.pid,action))
             act, chip = action.split(':')
             chip = int(chip)
             # check if action is raise (raise or raise-allin)

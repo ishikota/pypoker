@@ -92,6 +92,18 @@ class DealerTest(unittest.TestCase):
         eq_(100-5,  players[0].stack)
         eq_(15,  players[1].stack)
 
+    def test_action_history(self):
+        d = Dealer()
+        pot = Pot()
+        players = [MockPlayer(1,"a",100),MockPlayer(2,"b",15), MockPlayer(3,"c",50)]
+        players[0].set_action(["RAISE:10","CALL:10"])
+        players[1].set_action(["ALLIN:15"])
+        players[2].set_action(["RAISE:20"])
+        self.INFO.players = players
+        d.ask_action(players, pot, [], [], range(3),self.INFO)
+        eq_(["1:RAISE:10","2:ALLIN:15","3:RAISE:20","1:CALL:10"], self.INFO.last_actions)
+        self.INFO.get_last_acts4display()
+
     def test_legal_action_provide(self):
         self.INFO.street = GameInfo.PREFLOP
         self.INFO.sb_pos = 0

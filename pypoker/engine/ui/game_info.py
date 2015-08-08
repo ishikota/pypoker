@@ -48,6 +48,22 @@ class GameInfo:
         print ''
 
 
+    def display(self):
+        """
+            Display formatted game information on stdout.
+        """
+        div = '='*30
+        print ''
+        print div
+        print ' STREET : '+self.STREET_MAP[self.street]
+        print ' POT    : '+str(self.pot.get_chip())
+        print ' BOARD  : '+self.board.toString()
+        print ' STACK  : {0}'.format(self.get_player_stack4diplay())
+        print ' ACTIVE : {0}'.format(self.get_active_player4display())
+        print ' LAST ACTION: {0}'.format(self.get_last_acts4display())
+        print div
+        print ''
+
     def get_player_stack(self, players):
         """
             return all player's id and their stack in array

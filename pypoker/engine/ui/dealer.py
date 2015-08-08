@@ -194,9 +194,3 @@ class Dealer(object):
             if player.stack == 0:
                 retire.append(player.pid)
 
-    def display_result(self, count, winner, result):
-        print '\n*** ROUND '+str(count)+' RESULT ***\n'
-        for res in result:
-            win = ' ** WINNER **' if res[2] in winner else ''
-            print res[1] + '  ('+str(res[2].getStack())+')'+win
-        print '\n***********************\n'

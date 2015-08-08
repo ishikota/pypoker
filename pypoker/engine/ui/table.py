@@ -59,9 +59,11 @@ class Table(object):
         for i in range(n):
             # if one player beats the others then finish the game.
             if len(self.retire)+1 == len(self.players): break
-            if not self.AUTO: subprocess.call('clear')
+            if not self.AUTO and i != 0: subprocess.call('clear')
             self.init_round()
             ui.round_info(self.round_count, n, self.players, self.sb_pos)
+            if not self.AUTO:
+                raw_input('> Type any button to start the round...')
             self.play_round()
     
     # play one round
@@ -118,4 +120,4 @@ class Table(object):
     def showoff(self):
         winner, result = self.D.check_winner(self.players, self.deactive, self.board)
         self.D.money_to_winner(self.pot, self.players, winner, self.allin, self.retire)
-        self.D.display_result(self.round_count, winner, result)
+        ui.round_result(self.round_count, winner, result)

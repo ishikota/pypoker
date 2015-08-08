@@ -21,19 +21,19 @@ class GameInfoTest(unittest.TestCase):
 
     def test_stack_info(self):
         G = self.get_info()
-        ans = ["a:1000", "b:1000"]
-        eq_(ans, G.get_stacks())
+        eq_(["1:1000", "2:1000"], G.player_stacks)
+        eq_(["a:1000", "b:1000"], G.get_player_stack4display())
 
     def test_active_info(self):
         G = self.get_info()
-        ans = ["a", "b"]
-        eq_(ans, G.get_active())
+        eq_([1,2], G.active_players)
+        eq_(["a", "b"], G.get_active_player4display())
 
     def test_history(self):
         G = self.get_info()
         G.last_actions = ["1:RAISE:50"]
-        ans = ["a:RAISE:50"]
-        eq_(ans, G.get_last_acts())
+        eq_(["1:RAISE:50"], G.get_last_acts())
+        eq_(["a:RAISE:50"], G.get_last_acts4display())
 
 if __name__ == '__main__':
     unittest.main()

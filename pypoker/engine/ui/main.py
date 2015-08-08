@@ -28,6 +28,7 @@ C.read(path_to_config+"config.txt")
 p = C.getPlayers()
 t = Table()
 t.setup(p, C.getSBChip())
+t.AUTO = C.getIfAuto()
 
 # start the game !!
 t.start_game(C.getRoundNum())

@@ -1,6 +1,5 @@
 from engine.players.base_player import BasePlayer
 from engine.players.human import Human
-
 class Config:
     """
         This class reads game settings from config.txt
@@ -23,6 +22,7 @@ class Config:
         data['start_stack'] = int(data['start_stack'])
         data['round_num'] = int(data['round_num'])
         data['player_num'] = int(data['player_num'])
+        data['auto'] = bool(int(data['auto']))
 
     def getPlayers(self):
         players = [None]*3
@@ -47,3 +47,6 @@ class Config:
 
     def getSBChip(self):
         return self.data['sb_num']
+
+    def getIfAuto(self):
+        return self.data['auto']

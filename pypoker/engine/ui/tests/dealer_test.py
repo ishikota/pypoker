@@ -161,6 +161,28 @@ class DealerTest(unittest.TestCase):
         ok_("CALL:10" in acts)
         ok_("RAISE:25:25" in acts)
 
+    def test_correct_raise_up(self):
+        """
+        Regression test for raise amount back to $10 after $40
+        """
+        self.INFO.street = GameInfo.PREFLOP
+        self.INFO.sb_pos = 0
+        pot = Pot()
+        pot.add(5);pot.add(10)
+        d = Dealer()
+        p1 = MockPlayer(1,"a",1000)
+        p2 = MockPlayer(2,"b",1000)
+        p3 = MockPlayer(3,"c",1000)
+        players = [p1,p2,p3]
+        p1.set_action(["RAISE:20","RAISE:35","RAISE:50"])
+        p2.set_action(["RAISE:25","RAISE:40","FOLD:0"])
+        p3.set_action(["RAISE:15","RAISE:30","RAISE:45","FOLD:0"])
+        p1.D = True;p2.D = True;p3.D = True;
+        d.ask_action(players, pot, [], [], [2,0,1],self.INFO)
+        eq_(1000-105,p1.stack)
+        eq_(1000-65,p2.stack)
+        eq_(1000-15-30-45,p3.stack)
+
     def test_correct_action(self):
         d = Dealer()
         player = BasePlayer(1,'a',100)

@@ -79,7 +79,7 @@ class Dealer(object):
             act, chip = action.split(':')
             chip = int(chip)
             # check if action is raise (raise or raise-allin)
-            if bet_agree < chip:
+            if bet_agree < chip + pay[pos]:
                 agree_num = 0
                 bet_agree = chip + pay[pos]
 

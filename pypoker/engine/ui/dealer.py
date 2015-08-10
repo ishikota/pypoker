@@ -69,7 +69,7 @@ class Dealer(object):
 
             # if player is deactive or allin then skip him
             skip_flg = p.pid in deactive
-            for pid, bet in allin:
+            for pid, tmp1, tmp2 in allin:
                 skip_flg |= pid == p.pid
 
             if skip_flg:
@@ -93,7 +93,7 @@ class Dealer(object):
             if act == 'FOLD':
                 deactive.append(p.pid)
             elif act == 'ALLIN':
-                allin.append((p.pid, pay[pos] + chip))
+                allin.append((p.pid, pay[pos] + chip, p))
 
             # pay phase
             if act != 'FOLD':
@@ -190,12 +190,40 @@ class Dealer(object):
         If player's stack is 0, after stack update, then append
         his player id to passed retire array.
 
-        TODO: Not dealing with the case when allin player wins
+        TODO: When multiple player all-in in more than 4 player game,
+              this implementation doesn't give correct money like,
+              [ALLIN:20, ALLIN:50, CALL:70, CALL:70]
         """
-        n = len(winner)
-        win_chip = int(1.0*pot.get_chip()/n)
-        for player in winner:
-            player.addStack(win_chip)
+        allin_id = [pid for pid,bet,p in allin]
+        winner_id = [player.pid for player in winner]
+        allin_win_id = set(allin_id).intersection(set(winner_id))
+
+        if len(allin_win_id):
+            pot_chip = pot.get_chip()
+            # pay to allin-winner
+            for pid, bet, player in allin:
+                if player.pid in allin_win_id:
+                    player.addStack(bet*len(players))
+                    pot_chip -= bet*len(players)
+            # pay left pot to others
+            pure_winner_num = len(winner)-len(allin_win_id)
+            if pure_winner_num > 0:
+                # the case allin winner and not allin winner exist
+                win_chip = int(1.0*pot_chip/(len(winner)-len(allin_win_id)))
+                for player in winner:
+                    if player.pid not in allin_win_id:
+                        player.addStack(win_chip)
+            else:
+                # the case Not allin players are loser
+                win_chip = int(1.0*pot_chip/ (len(players)-len(allin_win_id)) )
+                for player in players:
+                    if player.pid not in allin_win_id:
+                        player.addStack(win_chip)
+        else:
+            win_chip = int(1.0*pot.get_chip()/len(winner))
+            for player in winner:
+                player.addStack(win_chip)
+
         for player in players:
             if player.stack == 0:
                 retire.append(player.pid)

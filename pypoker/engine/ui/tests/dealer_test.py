@@ -69,6 +69,7 @@ class DealerTest(unittest.TestCase):
         eq_(120, pot.chip)
         eq_(players[2].pid, allin[0][0])
         eq_(50, allin[0][1])
+        eq_(players[2], allin[0][2])
 
         pot = Pot()
         players = [MockPlayer(1,"a",100),MockPlayer(2,"b",15), MockPlayer(3,"c",50)]
@@ -223,6 +224,56 @@ class DealerTest(unittest.TestCase):
         eq_(41, players[1].getCards()[1].toID())
         eq_(3, players[2].getCards()[0].toID())
         eq_(16, players[2].getCards()[1].toID())
+
+    def test_money_to_winner(self):
+        d = Dealer()
+        pot = Pot()
+        players = [MockPlayer(1,"a",1000),MockPlayer(2,"b",1000),MockPlayer(3,"c",1000)]
+        # case 1 (one winner , no allin)
+        pot.chip = 150
+        d.money_to_winner(pot, players, [players[0]],[],[])
+        eq_(1000+150, players[0].stack)
+        # case 2 (two winners, no allin)
+        d.money_to_winner(pot, players, [players[1],players[2]],[],[])
+        eq_(1000+75, players[1].stack)
+        eq_(1000+75, players[2].stack)
+        # case 3 (one winner, allin)
+        pot.chip = 150
+        players = [MockPlayer(1,"allin",0),MockPlayer(2,"b",70),MockPlayer(3,"c",100)]
+        p = players[0]
+        d.money_to_winner(pot, players, [p],[(p.pid,20,p)],[])
+        eq_(60, p.stack)
+        eq_(115, players[1].stack)
+        eq_(145, players[2].stack)
+        # case 4 (two winner, both allin)
+        pot.chip = 160
+        players = [MockPlayer(1,"allin",0),MockPlayer(2,"allin2",0),MockPlayer(3,"c",100)]
+        w1 = players[0]
+        w2 = players[1]
+        d.money_to_winner(pot, players, [w1,w2],[(w1.pid,20,w1),(w2.pid,50,w2)],[])
+        eq_(60, w1.stack)
+        #eq_(100, w2.stack)
+        # case 5 (two winner, one allin another not-allin)
+        # situation is [ALLIN:20, CALL:50, CALL:50]
+        pot.chip = 120
+        players = [MockPlayer(1,"allin",0),MockPlayer(2,"b",10),MockPlayer(3,"win",100)]
+        w1 = players[0]
+        w2 = players[2]
+        d.money_to_winner(pot, players, [w1,w2],[(w1.pid,20,w1)],[])
+        eq_(60, w1.stack)
+        eq_(10, players[1].stack)
+        eq_(100+60, w2.stack)
+        # case6 (one winner, winner not allin and one-allin exists)
+        players = [MockPlayer(1,"allin",0),MockPlayer(2,"b",10),MockPlayer(3,"win",100)]
+        r1 = players[0]
+        w2 = players[2]
+        retire = []
+        d.money_to_winner(pot, players, [w2],[(r1.pid,20,w1)], retire)
+        eq_(0, r1.stack)
+        eq_(10, players[1].stack)
+        eq_(100+120, w2.stack)
+        eq_(1,len(retire))
+        ok_(r1.pid in retire)
 
 if __name__ == '__main__':
     unittest.main()

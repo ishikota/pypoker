@@ -215,6 +215,24 @@ class TableTest(unittest.TestCase):
         tb.play_round()
         eq_(120,p[0].stack)
 
+    def test_allin_pay(self):
+        tb = DebugTable()
+        p = [MockPlayer(1,"sb",100),MockPlayer(2,"bb",200),MockPlayer(3,"n",5)]
+        tb.setup(p, 5)
+        p = [MockPlayer(1,"sb",100),MockPlayer(2,"bb",200),MockPlayer(3,"allin-winner",5)]
+        p[0].set_action(["CALL:5"])
+        p[1].set_action(["FOLD:0"])
+        p[2].set_action(["CALL:10"])  # ALLIN:5
+        player_cards = [Card(4,2),Card(14,4),Card(4,2),Card(5,4),Card(8,2),Card(8,4)]
+        board_cards = [Card(7,2),Card(8,4),Card(2,8),Card(9,16),Card(3,2)]
+        tb.set_cheat_cards(player_cards, board_cards)
+        tb.players = p
+        tb.init_round()
+        tb.play_round()
+        eq_(95, p[0].stack)
+        eq_(195, p[1].stack)
+        eq_(15, p[2].stack)
+
 if __name__ == '__main__':
     unittest.main()
 

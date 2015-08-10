@@ -67,7 +67,8 @@ class DealerTest(unittest.TestCase):
         eq_(140,  players[1].stack)
         eq_(0,  players[2].stack)
         eq_(120, pot.chip)
-        eq_(players[2].pid, allin[0])
+        eq_(players[2].pid, allin[0][0])
+        eq_(50, allin[0][1])
 
         pot = Pot()
         players = [MockPlayer(1,"a",100),MockPlayer(2,"b",15), MockPlayer(3,"c",50)]

@@ -66,8 +66,13 @@ class Dealer(object):
         while agree_num < n and len(deactive)<n-1:
             pos = order[i]
             p = players[pos]
+
             # if player is deactive or allin then skip him
-            if p.pid in deactive or p.pid in allin:
+            skip_flg = p.pid in deactive
+            for pid, bet in allin:
+                skip_flg |= pid == p.pid
+
+            if skip_flg:
                 agree_num += 1
                 i=(i+1)%n
                 continue
@@ -88,7 +93,7 @@ class Dealer(object):
             if act == 'FOLD':
                 deactive.append(p.pid)
             elif act == 'ALLIN':
-                allin.append(p.pid)
+                allin.append((p.pid, pay[pos] + chip))
 
             # pay phase
             if act != 'FOLD':

@@ -8,3 +8,6 @@ install:
 script: nosetests --with-coverage pypoker/
 after_success:
     - coveralls
+notifications:
+    email: false
+    slack: kotaishimoto:mnkx14uWrYj3KKKXPOJT40dy

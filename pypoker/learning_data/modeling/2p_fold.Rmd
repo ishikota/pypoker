@@ -1,0 +1,117 @@
+---
+title: "2p fold model by GLM"
+author: "Kota Ishimoto"
+date: "2015年8月11日"
+output: html_document
+---
+## 目標
+2人対戦のポーカーの対戦データを利用して，プレイヤーの行動モデルの作成を行う．  
+今回作成するモデルは，プリフロップ時にFOLDする確率を予測するモデル．
+
+## データ
+データは，2人対戦ポーカーのプリフロップでの行動log 121174件を使う．
+このデータの構成は以下のようになっている．
+
+*action* : どの行動をとったか  
+*FOLD* : 自分の行動の前に何人FOLDしたか  
+*CALL.CHECK* : 自分の行動の前に何人CALLまたはCHECKをしたか  
+*BETS.RAISE* : 自分の行動の前に何人BETSまたはRAISEをしたか  
+*pot* : 行動するときのpotの額  
+*stack* : 行動するときの手持ちのchipの額   
+*active.player* : ゲームに参加している人数  
+```{r　data}
+setwd("/Users/kota/development/pypoker/pypoker/learning_data/data/csv")
+action <- read.csv("2_player_action_preflop.csv")
+summary(action)
+```
+
+
+また，２人対戦では，どちらかがFOLDしたらゲームが終わるので，*FOLD*の項目は今回必要ない．  
+さらに，ゲームに参加している人数も2人しかあり得ないので，*active.player*の項目も今回は必要ない．  
+以下で，不正な値のデータを取り除き，上の2つの項目をデータから削る．
+
+```{r clean data}
+action <- action[action$FOLD!=1 & action$active.player!=1,]
+action <- action[,c(1,3,4,5,6)]
+summary(action)
+```
+
+さらに，データをFOLDした時とそれ以外の時で分けて見てみる．  
+FOLDのデータが32894件(`r 32894/120856`%)，それ以外が87962件(`r 87962/120856`%)となった．
+```{r devide data}
+action.fold <- action[action$action=="Folds",]
+action.other <- action[action$action!="Folds",]
+summary(action.fold)
+summary(action.other)
+```
+
+データを整える．
+```{r clean data 2}
+fold.fold <- action.fold
+fold.other <- action.other
+fold.fold$action = 1
+fold.other$action = 0
+fold.data <- rbind(fold.fold, fold.other)
+```
+
+
+## GLMでモデルの作成
+FOLDするかしないかは，生起確率$q$のベルヌーイ分布に従っていると仮定すると，
+以下のような式で表せる．  
+$q=logistic(b_0 + b_1*x_1 + b_2*x_2 + b_3*x_3 + b_4*x_4)$
+
+*q* : FOLDする確率  
+*$x_1$* : CALLした回数  
+*$x_2$* : RAISEした回数  
+*$x_3$* : ポットの額  
+*$x_4$* : スタックの額  
+
+最尤推定で適切なパラメータを求めてみる．
+```{r calc GLM}
+fold.fit <- glm(cbind(action, 1-action) ~ CALL.CHECK + BETS.RAISE + pot + stack,
+                 data = fold.data, family = binomial)
+fold.fit
+```
+
+AICを基準に変数増加法で適切なモデル(使用する変数)を求めてみる．  
+以下で行っていることは，  
+
+1. 定数のみの回帰式で最尤推定, AICを求める
+2. 最もAICを小さくする変数を回帰式に追加
+3. AICが改善されなくなるまで，回帰式に変数を追加していく
+
+となっている．
+
+```{r stepAIC}
+library(MASS)
+const.model <- glm(formula = cbind(action, 1 - action) ~ 1, family = binomial, data=fold.data)
+stepAIC(const.model, direction = "forward", scope=list(upper=~CALL.CHECK+BETS.RAISE+pot+stack))
+```
+
+StepAICの結果は，全ての変数を使った方がいい．となった．  
+ということで，できたモデルはこんな感じ.
+
+$q=logistic(-1.137238 -1.984390*x_1 + 0.614558*x_2 + 0.001708*x_3 -0.001965*x_4)$
+
+*q* : FOLDする確率  
+*$x_1$* : CALLした回数  
+*$x_2$* : RAISEした回数  
+*$x_3$* : ポットの額  
+*$x_4$* : スタックの額  
+
+## モデルを解釈してみる
+
+オッズ比(事象が起こらない確率に対する起こる確率の比)に注目してみる．  
+$\frac{q_i}{1-q_i}=\exp(z_i)$  
+$=\exp(-1.137238 -1.984390*x_1 + 0.614558*x_2 + 0.001708*x_3 -0.001965*x_4)$  
+$=\exp(-1.137238)*\exp(-1.984390*x_1)*\exp(0.614558*x_2)*\exp(0.001708*x_3)*\exp( -0.001965*x_4)$  
+
+つまり，
+
+- CALLした回数が1増えると ，オッズは $\exp(-1.984390)$ = `r exp(-1.984390)`  倍になる
+- RAISEした回数が1増えると，オッズは $\exp(0.614558)$  = `r exp(0.614558)`   倍になる  
+- potのchipが1枚増えると  ，オッズは $\exp(0.001708)$  = `r exp(0.001708)`   倍になる  
+- stackのchipが1枚増えると，オッズは $\exp(-0.001965)$ = `r exp(-0.001965)`  倍になる  
+
+このモデルだと，周りがREISEしたら降りやすくなって，周りがCALLなら降りにくくなる．
+

@@ -1,0 +1,118 @@
+---
+title: "2p_glm"
+author: "Kota Ishimoto"
+date: "2015年8月12日"
+output: html_document
+---
+
+## 目標
+2人対戦のポーカーの対戦データを利用して，プレイヤーの行動モデルの作成を行う．  
+今回は，プリフロップ時のFOLD以外(CALL, RAISE)の行動の確率を予測するモデル．
+
+## データ
+以前と同じ
+
+```{r}
+setwd("/Users/kota/development/pypoker/pypoker/learning_data/data/csv")
+action <- read.csv("2_player_action_preflop.csv")
+action <- action[action$FOLD!=1 & action$active.player!=1,]
+action <- action[,c(1,3,4,5,6)]
+
+# GLM でロジスティック回帰するための準備 
+call.call <- action[action$action=="Calls" | action$action=="Checks",]
+call.other <- action[action$action!="Calls" & action$action!="Checks",]
+call.call$action = 1
+call.other$action = 0
+call.data <- rbind(call.call, call.other)
+
+raise.raise <- action[action$action=="Raises",]
+raise.other <- action[action$action!="Raises",]
+raise.raise$action = 1
+raise.other$action = 0
+raise.data <- rbind(raise.raise, raise.other)
+```
+
+## GLMでモデル作成
+変数増加法で最もAICが大きくなるモデルを探す．
+```{r glm, eval=FALSE}
+library(MASS)
+call.const <- glm(formula=cbind(action, 1-action)~1, family = binomial, data=call.data)
+stepAIC(call.const, direction = "forward", scope=list(upper=~CALL.CHECK+BETS.RAISE+pot+stack))
+raise.const <- glm(formula=cbind(action, 1-action)~1, family = binomial, data=raise.data)
+stepAIC(raise.const, direction = "forward", scope=list(upper=~CALL.CHECK+BETS.RAISE+pot+stack))
+```
+
+結果の前に，変数の確認  
+$q=logistic(b_0 + b_1*x_1 + b_2*x_2 + b_3*x_3 + b_4*x_4)$
+
+- *q* : FOLDする確率  
+- *$x_1$* : CALLした回数  
+- *$x_2$* : RAISEした回数  
+- *$x_3$* : ポットの額  
+- *$x_4$* : スタックの額 
+
+*GLMの結果*  
+CALLのモデル  
+```{r call model}
+glm(cbind(action, 1-action) ~ CALL.CHECK + stack,data = call.data, family = binomial)
+```
+
+$q=logistic(-0.174979 + 1.931870*x_1 - 0.006722*x_4)$  
+つまり，(オッズ = 事象が起こらない確率に対する起こる確率の比)  
+
+- CALLした回数が1増えると ，オッズは $\exp(1.931870)$ = `r exp(1.931870)`  倍になる  
+- stackのchipが1枚増えると，オッズは $\exp(-0.006722)$ = `r exp(-0.006722)`  倍になる  
+
+RAISEのモデル
+```{r raise model}
+glm(cbind(action, 1-action) ~ CALL.CHECK + BETS.RAISE + pot + stack,data = raise.data, family = binomial)
+```
+
+$q=logistic( -0.625485 - 1.274608*x_1 - 1.669268*x_2 - 0.011711*x_3 + 0.005221*x_4)$  
+つまり，  
+
+- CALLした回数が1増えると ，オッズは $\exp(-1.274608)$ = `r exp(-1.274608)`  倍になる  
+- RAISEした回数が1増えると，オッズは $\exp(-1.669268)$  = `r exp(-1.669268)`   倍になる    
+- potのchipが1枚増えると  ，オッズは $\exp(-0.011711)$  = `r exp(-0.011711)`   倍になる  
+- stackのchipが1枚増えると，オッズは $\exp(0.005221)$ = `r exp(0.005221)`  倍になる  
+
+
+## 完全分離
+最尤推定したら，生起確率qが0か1になりました．というエラーがほとんどのモデルで出てしまっていた．  
+対処法を調べた結果  
+How to deal with perfect separation in logistic regression?  
+(http://stats.stackexchange.com/questions/11109/how-to-deal-with-perfect-separation-in-logistic-regression)
+
+1. A solution to this is to utilize a form of penalized regression.  
+-> In fact, this is the original reason some of the penalized regression forms were developed 
+
+2. I believe the easiest and most straightforward solution to your problem is to use a  
+-> Bayesian analysis with non-informative prior assumptions as proposed by Gelman et al (2008).
+
+すぐ試せた「2. Bayesian analysisで無情報事前分布を使ってGLM」をとりあえず試してみる．
+
+```{r bayesian analysis}
+library(arm)
+call.fit <- bayesglm(cbind(action, 1-action) ~ CALL.CHECK + BETS.RAISE + pot + stack,data = call.data, family = binomial)
+```
+
+だめだった．  
+
+生起確率が0か1になってしまう状況は，完全分離と呼ばれる有名な問題らしい．  
+原因は，低確率の事象(Call or Raiseした)を観測するのにデータセットが小さすぎること．とある．  
+(http://support.minitab.com/ja-jp/minitab/17/topic-library/modeling-statistics/regression-and-correlation/logistic-regression/what-are-complete-separation-and-quasi-complete-separation/)
+
+## 今後やるべきこと
+
+- 作成したモデルでの行動予測の正解率を見る．
+- モデルを使った簡易AIを作ってみる．
+- MCTS AIを作る. 
+
+## その他
+プレイヤーの数理モデルを作る方法でいくべきか，何か他の方法でいくべきか．  
+このままいくなら，とりあえずデータセットを増やすか，  
+今やってる手法(GLMで予測)があんまりいい方法じゃない気がする．  
+統計のことをきちんと勉強しないと上手くいかない気がする．
+
+モデルに求めること
+- プレイヤのモデルは，MCTS内で使うものなので，そこそこの精度で計算時間の早いものが良い．

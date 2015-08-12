@@ -148,6 +148,78 @@ stepAIC(raise.const, direction = &quot;forward&quot;, scope=list(upper=~CALL.CHE
 </ul>
 </div>
 <div class="section level2">
+<h2>作ったモデルの精度</h2>
+<p>データ(行)から，各行動の確率を予測する関数の作成</p>
+<pre class="r"><code>logistic &lt;- function(z) {1/(1+exp(-z))}
+fold_predict &lt;- function(x1, x2, x3, x4) {
+  logistic(-1.137238 -1.984390*x1 + 0.614558*x2 + 0.001708*x3 -0.001965*x4)
+}
+call_predict &lt;- function(x1, x4) {
+  logistic(-0.174979 + 1.931870*x1 - 0.006722*x4)
+}
+raise_predict &lt;- function(x1, x2, x3, x4) {
+  logistic( -0.625485 - 1.274608*x1 - 1.669268*x2 - 0.011711*x3 + 0.005221*x4)
+}
+action_predict &lt;- function(row) {
+    y &lt;- row$action
+    x1 &lt;- row$CALL.CHECK
+    x2 &lt;- row$BETS.RAISE
+    x3 &lt;- row$pot
+    x4 &lt;- row$stack
+    fold_prob &lt;- fold_predict(x1,x2,x3,x4)
+    call_prob &lt;- call_predict(x1,x4)
+    raise_prob &lt;- raise_predict(x1,x2,x3,x4)
+    return (list(fold_prob, call_prob, raise_prob))
+}</code></pre>
+<p>3つの行動の中で最も確率が大きい行動を選択して，正解率を見る．</p>
+<pre class="r"><code>fold_correct &lt;- 0
+call_correct &lt;- 0
+raise_correct &lt;- 0
+fold_num &lt;- 0
+call_num &lt;- 0
+raise_num &lt;- 0
+for(i in 1:nrow(action)) {
+  row &lt;- action[i,]
+  prob &lt;- action_predict(row)
+  maxp &lt;- range(prob)[2]
+  if (maxp == prob[[1]]) {
+    fold_num &lt;- fold_num + 1
+    if(row$action == &quot;Folds&quot;) {
+      fold_correct &lt;- fold_correct + 1
+    }
+  } else if (maxp == prob[[2]]) {
+    call_num &lt;- call_num + 1
+    if(row$action == &quot;Calls&quot;) {
+      call_correct &lt;- call_correct + 1
+    }
+  } else if (maxp == prob[[3]]) {
+    raise_num &lt;- raise_num + 1
+    if(row$action == &quot;Raises&quot;) {
+      raise_correct &lt;- raise_correct + 1
+    }
+  }
+}
+# fold prediction accuracy
+fold_correct / fold_num</code></pre>
+<pre><code>## [1] 0.4468378</code></pre>
+<pre class="r"><code>fold_correct / 32894  # 32894 = nrow(fold.fold)</code></pre>
+<pre><code>## [1] 0.2364869</code></pre>
+<pre class="r"><code># call prediction accuracy
+call_correct / call_num</code></pre>
+<pre><code>## [1] 0.3547973</code></pre>
+<pre class="r"><code>call_correct / nrow(call.call)</code></pre>
+<pre><code>## [1] 0.4008383</code></pre>
+<pre class="r"><code># raise prediction accuracy
+raise_correct / raise_num</code></pre>
+<pre><code>## [1] 0.524722</code></pre>
+<pre class="r"><code>raise_correct / nrow(raise.raise)</code></pre>
+<pre><code>## [1] 0.6612699</code></pre>
+<pre class="r"><code># total prediction accuracy
+(fold_correct + call_correct + raise_correct) / nrow(action)</code></pre>
+<pre><code>## [1] 0.4324072</code></pre>
+<p>Raise</p>
+</div>
+<div class="section level2">
 <h2>完全分離</h2>
 <p>最尤推定したら，生起確率qが0か1になりました．というエラーがほとんどのモデルで出てしまっていた．<br />対処法を調べた結果<br />How to deal with perfect separation in logistic regression?<br />(<a href="http://stats.stackexchange.com/questions/11109/how-to-deal-with-perfect-separation-in-logistic-regression" class="uri">http://stats.stackexchange.com/questions/11109/how-to-deal-with-perfect-separation-in-logistic-regression</a>)</p>
 <ol style="list-style-type: decimal">
